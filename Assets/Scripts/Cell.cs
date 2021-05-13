@@ -18,16 +18,6 @@ public class Cell : MonoBehaviour
     
     public int GetCellEntropy()
     {
-        int number = 0;
-        
-        foreach (BasicTile tile in _tiles)
-        {
-            number += tile.NorthNeighbors.Count;
-            number += tile.SouthNeighbors.Count;
-            number += tile.EastNeighbors.Count;
-            number += tile.WestNeighbors.Count;
-        }
-
-        return number;
+        return _tiles.Count;
     }
 }

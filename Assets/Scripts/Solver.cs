@@ -29,13 +29,14 @@ public class Solver : MonoBehaviour
     {
         Initialize(_size, _tiles);
 
-        while (!IsCollapsed())
+        if (!IsCollapsed())
         {
             // One iteration
             var coord = GetMinimumEntropy();
             CollapseCell(coord);
             Propagate(coord);
         }
+
         foreach (Cell cell in _cells.Values)
         {
             cell.Render();
@@ -109,11 +110,12 @@ public class Solver : MonoBehaviour
         while (stack.Count > 0)
         {
             var currentCoords = stack.Pop();
+            Debug.Log("currentCoords " + currentCoords);
 
             var validDirections = ValidDirections(currentCoords);
             foreach (Directions direction in validDirections)
             {
-                Debug.Log("Direction " + direction);
+                Debug.Log("Checking " + direction);
 
                 var othercoords = GetCoordinateInDirection(currentCoords, direction);
 
@@ -123,16 +125,18 @@ public class Solver : MonoBehaviour
 
                 foreach (BasicTile tile in otherPossibleTiles)
                 {
-                    Debug.Log("Tile " + tile.name);
+                    Debug.Log("Checking if " + tile.name + " in " + othercoords + " is a possible neighbor for " + currentCoords);
 
-                    if (!possibleNeighborTiles.Any(x => x == tile))
-                    {
-                        Debug.Log("Removing " + tile.name + " from " + othercoords);
+                    //if (!possibleNeighborTiles.Any(x => x == tile))
+                    if (!possibleNeighborTiles.Contains(tile))
+                        {
+                        Debug.Log("It was not, removing " + tile.name + " from " + othercoords);
 
                         Constrain(othercoords, tile);
+
                         if (!stack.Contains(othercoords))
                         {
-                            Debug.Log("Adding " + othercoords);
+                            Debug.Log(othercoords + " has been modified, adding it to the stack");
                             stack.Push(othercoords);
                         }
                     }

@@ -21,7 +21,9 @@ public class Solver : MonoBehaviour
         var coord = GetMinimumEntropy();
 
         CollapseCell(coord);
+        Propagate(coord);
     }
+
 
     private void Initialize(Vector2Int fieldSize, List<BasicTile> tiles)
     {
@@ -77,5 +79,71 @@ public class Solver : MonoBehaviour
         Debug.Log($"Collapsing at coordinates: {coord}");
         _cells.TryGetValue(coord, out Cell cell);
         cell.Collapse();
+    }
+
+    private void Propagate(Vector2Int coord)
+    {
+        Stack<Vector2Int> stack = new Stack<Vector2Int>();
+        stack.Push(coord);
+
+        while (stack.Count > 0)
+        {
+            var current = stack.Pop();
+
+            var neighbors = ValidNeighbors(current);
+
+            foreach (Vector2Int coordinate in neighbors)
+            {
+
+            }
+
+
+            _cells.TryGetValue(otherCoords, out Cell otherCell);
+            var hej = otherCell.PossibleTiles;
+
+        }
+    }
+
+    private List<Vector2Int> ValidNeighbors(Vector2Int coordinates)
+    {
+        List<Vector2Int> list = new List<Vector2Int>();
+
+        for (int i = 0; i < 4; i++)
+        {
+            Vector2Int otherCoords = new Vector2Int();
+
+            switch (i)
+            {
+                case 0:
+                    // north
+                    otherCoords = new Vector2Int(coordinates.x, coordinates.y + 1);
+                    break;
+                case 1:
+                    // south
+                    otherCoords = new Vector2Int(coordinates.x, coordinates.y - 1);
+                    break;
+                case 2:
+                    // east
+                    otherCoords = new Vector2Int(coordinates.x + 1, coordinates.y);
+                    break;
+                case 3:
+                    // west
+                    otherCoords = new Vector2Int(coordinates.x - 1, coordinates.y);
+                    break;
+                default:
+                    break;
+            }
+
+            if (otherCoords.x < 0 || otherCoords.x > _size.x || otherCoords.y < 0 || otherCoords.y > _size.y)
+            {
+                Debug.Log(otherCoords + " is outside the grid");
+                continue;
+            }
+
+            Debug.Log("Adding " + otherCoords);
+            list.Add(otherCoords);
+        }
+
+        return list;
     }
 }

@@ -9,7 +9,7 @@ public class Cell : MonoBehaviour
     private List<BasicTile> _possibleTiles = new List<BasicTile>();
 
     public Vector2Int Coordinates { get => _coordinates; }
-    public List<BasicTile> Tiles { get => _possibleTiles; }
+    public List<BasicTile> PossibleTiles { get => _possibleTiles; }
 
     public void Init(Vector2Int coords, List<BasicTile> tiles)
     {
@@ -29,6 +29,6 @@ public class Cell : MonoBehaviour
         _possibleTiles.RemoveRange(0, _possibleTiles.Count - 1);
 
         GetComponent<SpriteRenderer>().sprite = _possibleTiles[0].Sprite;
-        Debug.Log(_possibleTiles[0].name);
+        Debug.Log("Collapsed to " + _possibleTiles[0].name);
     }
 }

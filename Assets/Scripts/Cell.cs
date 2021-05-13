@@ -14,7 +14,7 @@ public class Cell : MonoBehaviour
     public void Init(Vector2Int coords, List<BasicTile> tiles)
     {
         _coordinates = coords;
-        _possibleTiles = tiles;
+        _possibleTiles = new List<BasicTile>(tiles);
     }
     
     public int GetCellEntropy()
@@ -26,7 +26,7 @@ public class Cell : MonoBehaviour
     {
         int indexOfSavedTile = Random.Range(0, _possibleTiles.Count);
         _possibleTiles.RemoveRange(indexOfSavedTile + 1, _possibleTiles.Count - (indexOfSavedTile + 1));
-        _possibleTiles.RemoveRange(0, _possibleTiles.Count);
+        _possibleTiles.RemoveRange(0, _possibleTiles.Count - 1);
 
         Debug.Log(_possibleTiles.Count);
         Debug.Log(_possibleTiles[0].name);

@@ -13,13 +13,24 @@ public class Solver : MonoBehaviour
     [SerializeField]
     private Cell _cellPrefab = null;
 
-    private List<Cell> _cells = new List<Cell>();
+    private Dictionary<Vector2Int, Cell> _cells = new Dictionary<Vector2Int, Cell>();
 
     private void Start()
     {
         Initialize(_size, _tiles);
         var coord = GetMinimumEntropy();
+        
+        foreach (var item in _cells.Values)
+        {
+            Debug.Log(item.name + " has entropy " + item.GetCellEntropy());
+        }
+
         CollapseCell(coord);
+
+        foreach (var item in _cells.Values)
+        {
+            Debug.Log(item.name + " has entropy " + item.GetCellEntropy());
+        }
     }
 
     private void Initialize(Vector2Int fieldSize, List<BasicTile> tiles)
@@ -29,8 +40,10 @@ public class Solver : MonoBehaviour
             for (int x = 0; x < fieldSize.x; x++)
             {
                 var obj = Instantiate(_cellPrefab, new Vector3(x, 0, y), Quaternion.Euler(90, 0, 0));
-                _cells.Add(obj);
-                obj.Init(new Vector2Int(x, y), _tiles);
+                Vector2Int coord = new Vector2Int(x, y);
+                _cells.Add(coord, obj);
+                obj.Init(coord, _tiles);
+                obj.gameObject.name = "Cell " + x + ", " + y;
             }
         }
     }
@@ -39,7 +52,7 @@ public class Solver : MonoBehaviour
     {
         List<Cell> cells = new List<Cell>();
         int minEnt = 1000;
-        foreach (var cell in _cells)
+        foreach (Cell cell in _cells.Values)
         {
             int cellEnt = cell.GetCellEntropy();
             if (cellEnt < minEnt)
@@ -54,24 +67,25 @@ public class Solver : MonoBehaviour
                 cells.Add(cell);
             }
         }
+
         Debug.Log($"Minimum entropy found: {minEnt}");
 
         if (cells.Count > 1)
         {
             Debug.Log($"{cells.Count} Cells share the lowest entropy value");
             var randomCellCoordinates = cells[UnityEngine.Random.Range(0, cells.Count)].Coordinates;
-            Debug.Log($"Randomly selected Cell at coordinates: {randomCellCoordinates}");
             return randomCellCoordinates;
         }
         else
         {
-            Debug.Log($"Selected Cell at coordinates: {cells[0].Coordinates}");
             return cells[0].Coordinates;
         }
     }
 
     private void CollapseCell(Vector2Int coord)
     {
-
+        Debug.Log($"Collapsing at coordinates: {coord}");
+        _cells.TryGetValue(coord, out Cell cell);
+        cell.Collapse();
     }
 }

@@ -27,9 +27,9 @@ public class Solver : MonoBehaviour
 
     private void Start()
     {
+        //StartCoroutine(WFC());
 
-        StartCoroutine(WFC());
-        
+        Initialize(_size, _tiles);
     }
 
     private void Update()

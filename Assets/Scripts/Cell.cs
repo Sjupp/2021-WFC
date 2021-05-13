@@ -7,9 +7,11 @@ public class Cell : MonoBehaviour
     private Vector2Int _coordinates = new Vector2Int();
     [SerializeField]
     private List<BasicTile> _possibleTiles = new List<BasicTile>();
-    [SerializeField]
-    private List<SpriteRenderer> _renderers = null;
 
+    [SerializeField]
+    private SpriteRenderer _renderer = null;
+
+    private List<SpriteRenderer> _renderers = new List<SpriteRenderer>(); 
     private bool _collapsed = false;
 
     public bool Collapsed { get => _collapsed; }
@@ -20,6 +22,8 @@ public class Cell : MonoBehaviour
     {
         _coordinates = coords;
         _possibleTiles = new List<BasicTile>(tiles);
+
+        CreateRenderers();
     }
     
     public int GetCellEntropy()
@@ -39,6 +43,63 @@ public class Cell : MonoBehaviour
     {
         _collapsed = true;
         Render();
+    }
+
+    private void CreateRenderers()
+    {
+        int y = 0;
+        for (int i = 0; i < _possibleTiles.Count; i++)
+        {
+            int gridSize = CalculateDisplayGrid();
+
+            float offset = -(1f / 2f);
+
+            float segmentSize = (1f / ((float)gridSize + 1f));
+
+            float moduloAmountX = 1 + ((i % gridSize));
+
+            float moduloAmountY = 1f + (y);
+
+            Vector3 pos = transform.position + new Vector3(
+                offset + segmentSize * moduloAmountX,
+                0,
+                offset + segmentSize * moduloAmountY);
+
+            Instantiate(_renderer, pos, gameObject.transform.rotation, gameObject.transform);
+
+            if (i % gridSize == gridSize - 1)
+                y++;
+        }
+    }
+
+    private int CalculateDisplayGrid()
+    {
+        int gridSize = 0;
+
+        var count = _possibleTiles.Count;
+
+        if (count == 1)
+        {
+            gridSize = 1;
+        }
+        else if (count >= 2 && count <= 4)
+        {
+            gridSize = 2;
+        }
+        else if (count >= 5 && count <= 9)
+        {
+            gridSize = 3;
+        }
+        else if (count >= 10 && count <= 16)
+        {
+            gridSize = 4;
+        }
+        else if (count >= 17 && count <= 25)
+        {
+            gridSize = 5;
+        }
+
+        return gridSize;
     }
 
     public void Render()
@@ -62,8 +123,6 @@ public class Cell : MonoBehaviour
                 else
                     _renderers[i].sprite = null;
             }
-            
         }
-
     }
 }

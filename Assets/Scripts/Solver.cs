@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+
+
 
 public class Solver : MonoBehaviour
 {
@@ -18,8 +21,9 @@ public class Solver : MonoBehaviour
     private void Start()
     {
         Initialize(_size, _tiles);
+    
+        // One iteration
         var coord = GetMinimumEntropy();
-
         CollapseCell(coord);
         Propagate(coord);
     }
@@ -88,23 +92,36 @@ public class Solver : MonoBehaviour
 
         while (stack.Count > 0)
         {
-            var current = stack.Pop();
+            var currentCoords = stack.Pop();
 
-            var neighbors = ValidNeighbors(current);
-
-            foreach (Vector2Int coordinate in neighbors)
+            var validNeighborCoordinates = ValidDirections(currentCoords);
+            foreach (Vector2Int coordinate in validNeighborCoordinates)
             {
+                var othercoords = coordinate;
+                var otherPossibleTiles = new List<BasicTile>(_cells[othercoords].PossibleTiles);
+                var possibleNeighborTiles = new List<BasicTile>(ValidNeighborTiles(currentCoords, othercoords));
 
+                foreach (BasicTile tile in otherPossibleTiles)
+                {
+                    if (!otherPossibleTiles.Any(x => x == tile))
+                    {
+                        Constrain(othercoords, tile);
+                        if (!stack.Contains(othercoords))
+                            stack.Push(othercoords);
+                    }
+                }
             }
-
-
-            _cells.TryGetValue(otherCoords, out Cell otherCell);
-            var hej = otherCell.PossibleTiles;
-
         }
     }
 
-    private List<Vector2Int> ValidNeighbors(Vector2Int coordinates)
+    private void Constrain(Vector2Int coordinates, BasicTile tile)
+    {
+        Debug.Log("Constraining, nr before: " + _cells[coordinates].PossibleTiles.Count);
+        _cells[coordinates].PossibleTiles.Remove(tile);
+        Debug.Log("Constraining, nr after: " + _cells[coordinates].PossibleTiles.Count);
+    }
+
+    private List<Vector2Int> ValidDirections(Vector2Int coordinates)
     {
         List<Vector2Int> list = new List<Vector2Int>();
 
@@ -123,12 +140,12 @@ public class Solver : MonoBehaviour
                     otherCoords = new Vector2Int(coordinates.x, coordinates.y - 1);
                     break;
                 case 2:
-                    // east
-                    otherCoords = new Vector2Int(coordinates.x + 1, coordinates.y);
-                    break;
-                case 3:
                     // west
                     otherCoords = new Vector2Int(coordinates.x - 1, coordinates.y);
+                    break;
+                case 3:
+                    // east
+                    otherCoords = new Vector2Int(coordinates.x + 1, coordinates.y);
                     break;
                 default:
                     break;
@@ -136,14 +153,21 @@ public class Solver : MonoBehaviour
 
             if (otherCoords.x < 0 || otherCoords.x > _size.x || otherCoords.y < 0 || otherCoords.y > _size.y)
             {
-                Debug.Log(otherCoords + " is outside the grid");
                 continue;
             }
 
-            Debug.Log("Adding " + otherCoords);
             list.Add(otherCoords);
         }
 
         return list;
+    }
+
+    private List<BasicTile> ValidNeighborTiles(Vector2Int currentCoordinates, Vector2Int otherCoordinates)
+    {
+        List<BasicTile> tiles = new List<BasicTile>();
+
+
+
+        return tiles;
     }
 }

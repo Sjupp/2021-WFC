@@ -65,7 +65,9 @@ public class Cell : MonoBehaviour
                 0,
                 offset + segmentSize * moduloAmountY);
 
-            Instantiate(_renderer, pos, gameObject.transform.rotation, gameObject.transform);
+            var obj = Instantiate(_renderer, pos, gameObject.transform.rotation, gameObject.transform);
+            _renderers.Add(obj);
+            Render();
 
             if (i % gridSize == gridSize - 1)
                 y++;
@@ -106,7 +108,7 @@ public class Cell : MonoBehaviour
     {
         if (Collapsed)
         {
-            GetComponent<SpriteRenderer>().sprite = _possibleTiles[0].Sprite;
+            transform.GetChild(0).GetComponent<SpriteRenderer>().sprite = _possibleTiles[0].Sprite;
 
             foreach (var item in _renderers)
             {

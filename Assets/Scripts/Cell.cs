@@ -28,7 +28,7 @@ public class Cell : MonoBehaviour
         _possibleTiles.RemoveRange(indexOfSavedTile + 1, _possibleTiles.Count - (indexOfSavedTile + 1));
         _possibleTiles.RemoveRange(0, _possibleTiles.Count - 1);
 
-        Debug.Log(_possibleTiles.Count);
+        GetComponent<SpriteRenderer>().sprite = _possibleTiles[0].Sprite;
         Debug.Log(_possibleTiles[0].name);
     }
 }

@@ -19,18 +19,8 @@ public class Solver : MonoBehaviour
     {
         Initialize(_size, _tiles);
         var coord = GetMinimumEntropy();
-        
-        foreach (var item in _cells.Values)
-        {
-            Debug.Log(item.name + " has entropy " + item.GetCellEntropy());
-        }
 
         CollapseCell(coord);
-
-        foreach (var item in _cells.Values)
-        {
-            Debug.Log(item.name + " has entropy " + item.GetCellEntropy());
-        }
     }
 
     private void Initialize(Vector2Int fieldSize, List<BasicTile> tiles)

@@ -107,7 +107,7 @@ public class Solver : MonoBehaviour
 
                 var otherPossibleTiles = new List<BasicTile>(_cells[othercoords].PossibleTiles);
                 
-                var possibleNeighborTiles = new List<BasicTile>(ValidNeighborTiles(currentCoords, othercoords));
+                var possibleNeighborTiles = new List<BasicTile>(ValidNeighborTiles(currentCoords, direction));
 
                 foreach (BasicTile tile in otherPossibleTiles)
                 {
@@ -169,12 +169,57 @@ public class Solver : MonoBehaviour
         return otherCoords;
     }
 
-    private List<BasicTile> ValidNeighborTiles(Vector2Int currentCoordinates, Vector2Int otherCoordinates)
+    private List<BasicTile> ValidNeighborTiles(Vector2Int fromCoordinate, Directions direction)
     {
         List<BasicTile> tiles = new List<BasicTile>();
 
+        var cell = _cells[fromCoordinate];
 
+        switch (direction)
+        {
+            case Directions.North:
+                foreach (BasicTile tile in cell.PossibleTiles)
+                {
+                    foreach (int tileId in tile.NorthNeighbors)
+                    {
+                        if (!tiles.Any(x => x == tile))
+                            tiles.Add(_tiles[tileId]);
+                    }
+                }
+                break;
+            case Directions.South:
+                foreach (BasicTile tile in cell.PossibleTiles)
+                {
+                    foreach (int tileId in tile.SouthNeighbors)
+                    {
+                        if (!tiles.Any(x => x == tile))
+                            tiles.Add(_tiles[tileId]);
+                    }
+                }
+                break;
+            case Directions.West:
+                foreach (BasicTile tile in cell.PossibleTiles)
+                {
+                    foreach (int tileId in tile.WestNeighbors)
+                    {
+                        if (!tiles.Any(x => x == tile))
+                            tiles.Add(_tiles[tileId]);
+                    }
+                }
+                break;
+            case Directions.East:
+                foreach (BasicTile tile in cell.PossibleTiles)
+                {
+                    foreach (int tileId in tile.EastNeighbors)
+                    {
+                        if (!tiles.Any(x => x == tile))
+                            tiles.Add(_tiles[tileId]);
+                    }
+                }
+                break;
+        }
 
         return tiles;
     }
+
 }

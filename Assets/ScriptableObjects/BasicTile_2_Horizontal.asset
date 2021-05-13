@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: BasicTile_2_Horizontal
   m_EditorClassIdentifier: 
   Sprite: {fileID: 21300000, guid: db6d5d12b3c9cac49a7053c320f5426c, type: 3}
+  Id: 2
   NorthNeighbors: 0200000000000000
   SouthNeighbors: 0200000000000000
   WestNeighbors: 0200000003000000

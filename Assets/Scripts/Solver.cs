@@ -27,25 +27,32 @@ public class Solver : MonoBehaviour
 
     private void Start()
     {
-        DoOnce();
+
+        StartCoroutine(WFC());
+        
     }
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            Iterate();
+            StartCoroutine(WFC());
         }
     }
 
-
-    private void DoOnce()
+    private IEnumerator WFC()
     {
         ClearPrevious();
 
         Initialize(_size, _tiles);
+        
+        yield return new WaitForSeconds(0.2f);
 
-        Iterate();
+        while (!IsCollapsed())
+        {
+            Iterate();
+            yield return new WaitForSeconds(0.2f);
+        }
 
         Debug.Log("Done");
     }

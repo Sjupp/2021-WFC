@@ -22,64 +22,42 @@ public class Solver : MonoBehaviour
     private float _tileSpacing = 1.0f;
     [SerializeField]
     private Cell _cellPrefab = null;
-    [SerializeField]
-    private Transform _gridHolder = null;
 
     private Dictionary<Vector2Int, Cell> _cells = new Dictionary<Vector2Int, Cell>();
 
     private void Start()
     {
-        if (_gridHolder.transform.childCount > 0)
-            foreach (Transform child in _gridHolder)
-                Destroy(child.gameObject);
-
-        Initialize(_size, _tiles);
-
-        if (!IsCollapsed())
-        {
-            // One iteration
-            var coord = GetMinimumEntropy();
-            CollapseCell(coord);
-            Propagate(coord);
-        }
-
-        foreach (Cell cell in _cells.Values)
-        {
-            cell.Render();
-        }
-
-        Debug.Log("Done");
+        DoOnce();
     }
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            DoWFC();
+            Iterate();
         }
     }
 
 
-    private void DoWFC()
+    private void DoOnce()
     {
+        ClearPrevious();
+
         Initialize(_size, _tiles);
 
-        if (!IsCollapsed())
-        {
-            // One iteration
-            var coord = GetMinimumEntropy();
-            CollapseCell(coord);
-            Propagate(coord);
-        }
-
-        foreach (Cell cell in _cells.Values)
-        {
-            cell.Render();
-        }
+        Iterate();
 
         Debug.Log("Done");
     }
 
+    private void ClearPrevious()
+    {
+        _cells.Clear();
+
+        if (gameObject.transform.childCount > 0)
+            foreach (Transform child in gameObject.transform)
+                Destroy(child.gameObject);
+    }
 
     private void Initialize(Vector2Int fieldSize, List<BasicTile> tiles)
     {
@@ -87,7 +65,7 @@ public class Solver : MonoBehaviour
         {
             for (int x = 0; x < fieldSize.x; x++)
             {
-                var obj = Instantiate(_cellPrefab, new Vector3(x * _tileSpacing, 0, y * _tileSpacing), Quaternion.Euler(90, 0, 0));
+                var obj = Instantiate(_cellPrefab, new Vector3(x * _tileSpacing, 0, y * _tileSpacing), Quaternion.Euler(90, 0, 0), gameObject.transform);
                 Vector2Int coord = new Vector2Int(x, y);
                 _cells.Add(coord, obj);
                 obj.Init(coord, _tiles);
@@ -96,11 +74,31 @@ public class Solver : MonoBehaviour
         }
     }
 
+    private void Iterate()
+    {
+        var coord = GetMinimumEntropy();
+        CollapseCell(coord);
+        Propagate(coord);
+        
+        Render();
+        
+        if (IsCollapsed())
+            Debug.LogWarning("We're done!");
+    }
+
+    private void Render()
+    {
+        foreach (Cell cell in _cells.Values)
+        {
+            cell.Render();
+        }
+    }
+
     private Vector2Int GetMinimumEntropy()
     {
         List<Cell> cells = new List<Cell>();
         int minEnt = 1000;
-        foreach (Cell cell in _cells.Values)
+        foreach (Cell cell in _cells.Values.Where(x => x.Collapsed == false))
         {
             int cellEnt = cell.GetCellEntropy();
             if (cellEnt < minEnt)
@@ -145,46 +143,35 @@ public class Solver : MonoBehaviour
         while (stack.Count > 0)
         {
             var currentCoords = stack.Pop();
-            Debug.Log("currentCoords " + currentCoords);
 
             var validDirections = ValidDirections(currentCoords);
             foreach (Directions direction in validDirections)
             {
-                Debug.Log("Checking " + direction);
-
                 var othercoords = GetCoordinateInDirection(currentCoords, direction);
 
                 var otherPossibleTiles = new List<BasicTile>(_cells[othercoords].PossibleTiles);
                 
                 var possibleNeighborTiles = new List<BasicTile>(ValidNeighborTiles(currentCoords, direction));
 
-                Debug.Log("--- possible tiles ---");
-                foreach (var tile in possibleNeighborTiles)
-                {
-                    Debug.Log(tile.name);
-                }
-                Debug.Log("--- -------------- ---");
-
                 foreach (BasicTile tile in otherPossibleTiles)
                 {
-                    Debug.Log("Checking if " + tile.name + " in " + othercoords + " is a possible neighbor for " + currentCoords);
+                    //Debug.Log("Checking if " + tile.name + " in " + othercoords + " is a possible neighbor for " + currentCoords);
 
-                    //if (!possibleNeighborTiles.Any(x => x == tile))
                     if (!possibleNeighborTiles.Contains(tile))
                         {
-                        Debug.Log("It was not, removing " + tile.name + " from " + othercoords);
+                        //Debug.Log("It was not, removing " + tile.name + " from " + othercoords);
 
                         Constrain(othercoords, tile);
 
                         if (!stack.Contains(othercoords))
                         {
-                            Debug.Log(othercoords + " has been modified, adding it to the stack");
+                            //Debug.Log(othercoords + " has been modified, adding it to the stack");
                             stack.Push(othercoords);
                         }
                     }
                     else
                     {
-                        Debug.Log("It was, keeping " + tile.name + " in " + othercoords);
+                        //Debug.Log("It was, keeping " + tile.name + " in " + othercoords);
                     }
                 }
             }
@@ -193,9 +180,13 @@ public class Solver : MonoBehaviour
 
     private void Constrain(Vector2Int coordinates, BasicTile tile)
     {
-        Debug.Log("Constraining, nr before: " + _cells[coordinates].PossibleTiles.Count);
-        _cells[coordinates].PossibleTiles.Remove(tile);
-        Debug.Log("Constraining, nr after: " + _cells[coordinates].PossibleTiles.Count);
+        var cell = _cells[coordinates];
+        cell.PossibleTiles.Remove(tile);
+
+        if (cell.PossibleTiles.Count == 1)
+        {
+            cell.SetCollapsed();
+        }
     }
 
     private List<Directions> ValidDirections(Vector2Int coordinates)
@@ -240,8 +231,6 @@ public class Solver : MonoBehaviour
 
     private List<BasicTile> ValidNeighborTiles(Vector2Int fromCoordinate, Directions direction)
     {
-        Debug.Log("ValidNeighborTiles");
-
         List<BasicTile> tiles = new List<BasicTile>();
 
         var cell = _cells[fromCoordinate];
@@ -253,7 +242,6 @@ public class Solver : MonoBehaviour
                 {
                     foreach (int viableNeighborTileId in possibleTile.NorthNeighbors)
                     {
-                        Debug.Log(viableNeighborTileId);
                         var tile = _tiles[viableNeighborTileId];
                         if (!tiles.Contains(tile))
                             tiles.Add(tile);
@@ -265,7 +253,6 @@ public class Solver : MonoBehaviour
                 {
                     foreach (int viableNeighborTileId in possibleTile.SouthNeighbors)
                     {
-                        Debug.Log(viableNeighborTileId);
                         var tile = _tiles[viableNeighborTileId];
                         if (!tiles.Contains(tile))
                             tiles.Add(tile);
@@ -277,7 +264,6 @@ public class Solver : MonoBehaviour
                 {
                     foreach (int viableNeighborTileId in possibleTile.WestNeighbors)
                     {
-                        Debug.Log(viableNeighborTileId);
                         var tile = _tiles[viableNeighborTileId];
                         if (!tiles.Contains(tile))
                             tiles.Add(tile);
@@ -289,7 +275,6 @@ public class Solver : MonoBehaviour
                 {
                     foreach (int viableNeighborTileId in possibleTile.EastNeighbors)
                     {
-                        Debug.Log(viableNeighborTileId);
                         var tile = _tiles[viableNeighborTileId];
                         if (!tiles.Contains(tile))
                             tiles.Add(tile);
@@ -305,7 +290,7 @@ public class Solver : MonoBehaviour
     {
         foreach (Cell cell in _cells.Values)
         {
-            if (cell.PossibleTiles.Count > 0)
+            if (!cell.Collapsed)
                 return false;
         }
 

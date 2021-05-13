@@ -56,7 +56,7 @@ public class Solver : MonoBehaviour
             yield return new WaitForSeconds(_intervalTime);
         }
 
-        Debug.Log("Done");
+        Debug.Log("Done!");
     }
 
     private void ClearPrevious()
@@ -123,11 +123,11 @@ public class Solver : MonoBehaviour
             }
         }
 
-        Debug.Log($"Minimum entropy found: {minEnt}");
+        //Debug.Log($"Minimum entropy found: {minEnt}");
 
         if (cells.Count > 1)
         {
-            Debug.Log($"{cells.Count} Cells share the lowest entropy value, collapsing random");
+            //Debug.Log($"{cells.Count} Cells share the lowest entropy value, collapsing random");
             var randomCellCoordinates = cells[UnityEngine.Random.Range(0, cells.Count)].Coordinates;
             return randomCellCoordinates;
         }
@@ -139,7 +139,7 @@ public class Solver : MonoBehaviour
 
     private void CollapseCell(Vector2Int coord)
     {
-        Debug.Log($"Collapsing at coordinates: {coord}");
+        //Debug.Log($"Collapsing at coordinates: {coord}");
         _cells.TryGetValue(coord, out Cell cell);
         cell.Collapse();
     }

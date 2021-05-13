@@ -53,7 +53,7 @@ public class Solver : MonoBehaviour
         while (!IsCollapsed())
         {
             Iterate();
-            yield return new WaitForSeconds(_intervalTime;
+            yield return new WaitForSeconds(_intervalTime);
         }
 
         Debug.Log("Done");

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -17,6 +18,8 @@ public class Solver : MonoBehaviour
     private void Start()
     {
         Initialize(_size, _tiles);
+        var coord = GetMinimumEntropy();
+        CollapseCell(coord);
     }
 
     private void Initialize(Vector2Int fieldSize, List<BasicTile> tiles)
@@ -34,7 +37,7 @@ public class Solver : MonoBehaviour
 
     private Vector2Int GetMinimumEntropy()
     {
-        List<Cell> cells = null;
+        List<Cell> cells = new List<Cell>();
         int minEnt = 1000;
         foreach (var cell in _cells)
         {
@@ -42,7 +45,8 @@ public class Solver : MonoBehaviour
             if (cellEnt < minEnt)
             {
                 minEnt = cellEnt;
-                cells.Clear();
+                if (cells.Count > 0)
+                    cells.Clear();
                 cells.Add(cell);
             }
             else if (cellEnt == minEnt)
@@ -50,10 +54,24 @@ public class Solver : MonoBehaviour
                 cells.Add(cell);
             }
         }
+        Debug.Log($"Minimum entropy found: {minEnt}");
 
         if (cells.Count > 1)
-            return cells[Random.Range(0, cells.Count)].Coordinates;
+        {
+            Debug.Log($"{cells.Count} Cells share the lowest entropy value");
+            var randomCellCoordinates = cells[UnityEngine.Random.Range(0, cells.Count)].Coordinates;
+            Debug.Log($"Randomly selected Cell at coordinates: {randomCellCoordinates}");
+            return randomCellCoordinates;
+        }
         else
+        {
+            Debug.Log($"Selected Cell at coordinates: {cells[0].Coordinates}");
             return cells[0].Coordinates;
+        }
+    }
+
+    private void CollapseCell(Vector2Int coord)
+    {
+
     }
 }

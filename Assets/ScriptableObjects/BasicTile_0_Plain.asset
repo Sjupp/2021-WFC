@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Sprite: {fileID: 21300000, guid: bd06987b8ea9bdc4bbb754c3feb0b256, type: 3}
   Id: 0
-  NorthNeighbors: 0000000002000000
-  SouthNeighbors: 0000000002000000
-  WestNeighbors: 0000000001000000
-  EastNeighbors: 0000000001000000
+  NorthNeighbors: 00000000020000000600000007000000
+  SouthNeighbors: 00000000020000000400000005000000
+  WestNeighbors: 00000000010000000500000006000000
+  EastNeighbors: 00000000010000000400000007000000

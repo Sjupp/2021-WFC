@@ -21,6 +21,8 @@ public class Solver : MonoBehaviour
     [SerializeField]
     private float _tileSpacing = 1.0f;
     [SerializeField]
+    private float _intervalTime = 0.1f;
+    [SerializeField]
     private Cell _cellPrefab = null;
 
     private Dictionary<Vector2Int, Cell> _cells = new Dictionary<Vector2Int, Cell>();
@@ -46,12 +48,12 @@ public class Solver : MonoBehaviour
 
         Initialize(_size, _tiles);
         
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(_intervalTime);
 
         while (!IsCollapsed())
         {
             Iterate();
-            yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSeconds(_intervalTime;
         }
 
         Debug.Log("Done");

@@ -4,7 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-
+public enum Directions
+{
+    North,
+    South,
+    West,
+    East
+}
 
 public class Solver : MonoBehaviour
 {
@@ -94,11 +100,13 @@ public class Solver : MonoBehaviour
         {
             var currentCoords = stack.Pop();
 
-            var validNeighborCoordinates = ValidDirections(currentCoords);
-            foreach (Vector2Int coordinate in validNeighborCoordinates)
+            var validDirections = ValidDirections(currentCoords);
+            foreach (Directions direction in validDirections)
             {
-                var othercoords = coordinate;
+                var othercoords = GetCoordinateInDirection(currentCoords, direction);
+
                 var otherPossibleTiles = new List<BasicTile>(_cells[othercoords].PossibleTiles);
+                
                 var possibleNeighborTiles = new List<BasicTile>(ValidNeighborTiles(currentCoords, othercoords));
 
                 foreach (BasicTile tile in otherPossibleTiles)
@@ -121,45 +129,44 @@ public class Solver : MonoBehaviour
         Debug.Log("Constraining, nr after: " + _cells[coordinates].PossibleTiles.Count);
     }
 
-    private List<Vector2Int> ValidDirections(Vector2Int coordinates)
+    private List<Directions> ValidDirections(Vector2Int coordinates)
     {
-        List<Vector2Int> list = new List<Vector2Int>();
+        List<Directions> list = new List<Directions>();
 
         for (int i = 0; i < 4; i++)
         {
-            Vector2Int otherCoords = new Vector2Int();
-
-            switch (i)
-            {
-                case 0:
-                    // north
-                    otherCoords = new Vector2Int(coordinates.x, coordinates.y + 1);
-                    break;
-                case 1:
-                    // south
-                    otherCoords = new Vector2Int(coordinates.x, coordinates.y - 1);
-                    break;
-                case 2:
-                    // west
-                    otherCoords = new Vector2Int(coordinates.x - 1, coordinates.y);
-                    break;
-                case 3:
-                    // east
-                    otherCoords = new Vector2Int(coordinates.x + 1, coordinates.y);
-                    break;
-                default:
-                    break;
-            }
+            Vector2Int otherCoords = GetCoordinateInDirection(coordinates, (Directions)i);
 
             if (otherCoords.x < 0 || otherCoords.x > _size.x || otherCoords.y < 0 || otherCoords.y > _size.y)
-            {
                 continue;
-            }
-
-            list.Add(otherCoords);
+            
+            list.Add((Directions)i);
         }
 
         return list;
+    }
+
+    private Vector2Int GetCoordinateInDirection(Vector2Int fromCoordinate, Directions direction)
+    {
+        Vector2Int otherCoords = new Vector2Int();
+
+        switch (direction)
+        {
+            case Directions.North:
+                otherCoords = new Vector2Int(fromCoordinate.x, fromCoordinate.y + 1);
+                break;
+            case Directions.South:
+                otherCoords = new Vector2Int(fromCoordinate.x, fromCoordinate.y - 1);
+                break;
+            case Directions.West:
+                otherCoords = new Vector2Int(fromCoordinate.x - 1, fromCoordinate.y);
+                break;
+            case Directions.East:
+                otherCoords = new Vector2Int(fromCoordinate.x + 1, fromCoordinate.y);
+                break;
+        }
+
+        return otherCoords;
     }
 
     private List<BasicTile> ValidNeighborTiles(Vector2Int currentCoordinates, Vector2Int otherCoordinates)

@@ -22,10 +22,45 @@ public class Solver : MonoBehaviour
     private float _tileSpacing = 1.0f;
     [SerializeField]
     private Cell _cellPrefab = null;
+    [SerializeField]
+    private Transform _gridHolder = null;
 
     private Dictionary<Vector2Int, Cell> _cells = new Dictionary<Vector2Int, Cell>();
 
     private void Start()
+    {
+        if (_gridHolder.transform.childCount > 0)
+            foreach (Transform child in _gridHolder)
+                Destroy(child.gameObject);
+
+        Initialize(_size, _tiles);
+
+        if (!IsCollapsed())
+        {
+            // One iteration
+            var coord = GetMinimumEntropy();
+            CollapseCell(coord);
+            Propagate(coord);
+        }
+
+        foreach (Cell cell in _cells.Values)
+        {
+            cell.Render();
+        }
+
+        Debug.Log("Done");
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            DoWFC();
+        }
+    }
+
+
+    private void DoWFC()
     {
         Initialize(_size, _tiles);
 
@@ -85,7 +120,7 @@ public class Solver : MonoBehaviour
 
         if (cells.Count > 1)
         {
-            Debug.Log($"{cells.Count} Cells share the lowest entropy value");
+            Debug.Log($"{cells.Count} Cells share the lowest entropy value, collapsing random");
             var randomCellCoordinates = cells[UnityEngine.Random.Range(0, cells.Count)].Coordinates;
             return randomCellCoordinates;
         }
@@ -123,6 +158,13 @@ public class Solver : MonoBehaviour
                 
                 var possibleNeighborTiles = new List<BasicTile>(ValidNeighborTiles(currentCoords, direction));
 
+                Debug.Log("--- possible tiles ---");
+                foreach (var tile in possibleNeighborTiles)
+                {
+                    Debug.Log(tile.name);
+                }
+                Debug.Log("--- -------------- ---");
+
                 foreach (BasicTile tile in otherPossibleTiles)
                 {
                     Debug.Log("Checking if " + tile.name + " in " + othercoords + " is a possible neighbor for " + currentCoords);
@@ -139,6 +181,10 @@ public class Solver : MonoBehaviour
                             Debug.Log(othercoords + " has been modified, adding it to the stack");
                             stack.Push(othercoords);
                         }
+                    }
+                    else
+                    {
+                        Debug.Log("It was, keeping " + tile.name + " in " + othercoords);
                     }
                 }
             }
@@ -194,6 +240,8 @@ public class Solver : MonoBehaviour
 
     private List<BasicTile> ValidNeighborTiles(Vector2Int fromCoordinate, Directions direction)
     {
+        Debug.Log("ValidNeighborTiles");
+
         List<BasicTile> tiles = new List<BasicTile>();
 
         var cell = _cells[fromCoordinate];
@@ -201,42 +249,50 @@ public class Solver : MonoBehaviour
         switch (direction)
         {
             case Directions.North:
-                foreach (BasicTile tile in cell.PossibleTiles)
+                foreach (BasicTile possibleTile in cell.PossibleTiles)
                 {
-                    foreach (int tileId in tile.NorthNeighbors)
+                    foreach (int viableNeighborTileId in possibleTile.NorthNeighbors)
                     {
-                        if (!tiles.Any(x => x == tile))
-                            tiles.Add(_tiles[tileId]);
+                        Debug.Log(viableNeighborTileId);
+                        var tile = _tiles[viableNeighborTileId];
+                        if (!tiles.Contains(tile))
+                            tiles.Add(tile);
                     }
                 }
                 break;
             case Directions.South:
-                foreach (BasicTile tile in cell.PossibleTiles)
+                foreach (BasicTile possibleTile in cell.PossibleTiles)
                 {
-                    foreach (int tileId in tile.SouthNeighbors)
+                    foreach (int viableNeighborTileId in possibleTile.SouthNeighbors)
                     {
-                        if (!tiles.Any(x => x == tile))
-                            tiles.Add(_tiles[tileId]);
+                        Debug.Log(viableNeighborTileId);
+                        var tile = _tiles[viableNeighborTileId];
+                        if (!tiles.Contains(tile))
+                            tiles.Add(tile);
                     }
                 }
                 break;
             case Directions.West:
-                foreach (BasicTile tile in cell.PossibleTiles)
+                foreach (BasicTile possibleTile in cell.PossibleTiles)
                 {
-                    foreach (int tileId in tile.WestNeighbors)
+                    foreach (int viableNeighborTileId in possibleTile.WestNeighbors)
                     {
-                        if (!tiles.Any(x => x == tile))
-                            tiles.Add(_tiles[tileId]);
+                        Debug.Log(viableNeighborTileId);
+                        var tile = _tiles[viableNeighborTileId];
+                        if (!tiles.Contains(tile))
+                            tiles.Add(tile);
                     }
                 }
                 break;
             case Directions.East:
-                foreach (BasicTile tile in cell.PossibleTiles)
+                foreach (BasicTile possibleTile in cell.PossibleTiles)
                 {
-                    foreach (int tileId in tile.EastNeighbors)
+                    foreach (int viableNeighborTileId in possibleTile.EastNeighbors)
                     {
-                        if (!tiles.Any(x => x == tile))
-                            tiles.Add(_tiles[tileId]);
+                        Debug.Log(viableNeighborTileId);
+                        var tile = _tiles[viableNeighborTileId];
+                        if (!tiles.Contains(tile))
+                            tiles.Add(tile);
                     }
                 }
                 break;

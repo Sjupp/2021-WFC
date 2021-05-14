@@ -32,6 +32,7 @@ public class Solver : MonoBehaviour
         //StartCoroutine(WFC());
 
         Initialize(_size, _tiles);
+        Debug.Log("Hello! Press Spacebar to begin.");
     }
 
     private void Update()
@@ -56,7 +57,7 @@ public class Solver : MonoBehaviour
             yield return new WaitForSeconds(_intervalTime);
         }
 
-        Debug.Log("Done!");
+        Debug.Log("Done! Press Spacebar again to generate a new grid.");
     }
 
     private void ClearPrevious()
